@@ -348,7 +348,7 @@ int  sol_stor_base(struct s_base *, const char *);
 
 struct path
 {
-    char prefix[16];
+    char prefix[64];
     char suffix[8];
 };
 

@@ -12,7 +12,11 @@
  * General Public License for more details.
  */
 
+#ifdef N64
+#include <libdragon.h>
+#else
 #include <dirent.h>
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -30,6 +34,27 @@
 /*
  * Enumerate files in a system directory. Returns a List of allocated filenames.
  */
+#ifdef N64
+#include <assert.h>
+List dir_list_files(const char *path)
+{
+    fprintf(stderr, "List files in %s\n", path);
+    dir_t dir;
+    List files = NULL;
+
+    if (dir_findfirst(path, &dir) == 0)
+    {
+        do
+        {
+            if (strcmp(dir.d_name, ".") == 0 || strcmp(dir.d_name, "..") == 0)
+                continue;
+
+            files = list_cons(strdup(dir.d_name), files);
+        } while (dir_findnext(path, &dir) == 0);
+    }
+    return files;
+}
+#else
 List dir_list_files(const char *path)
 {
     DIR *dir;
@@ -52,6 +77,7 @@ List dir_list_files(const char *path)
 
     return files;
 }
+#endif
 
 /*
  * Free the allocated filenames and the List cells.
@@ -147,6 +173,11 @@ void dir_free(Array items)
  */
 int dir_exists(const char *path)
 {
+    #ifdef N64
+    dir_t dir;
+    //err, is this right?
+    return (dir_findfirst(path, &dir) == 0);
+    #else
     DIR *dir;
 
     if ((dir = opendir(path)))
@@ -155,4 +186,5 @@ int dir_exists(const char *path)
         return 1;
     }
     return 0;
+    #endif
 }

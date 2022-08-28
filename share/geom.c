@@ -102,6 +102,9 @@ static void tex_env_conf_default(int stage, int enable)
 
 static void tex_env_conf_shadow(int stage, int enable)
 {
+    #ifdef N64
+    #warning Shadows not supported
+    #else
     switch (stage)
     {
     case TEX_STAGE_SHADOW:
@@ -172,6 +175,7 @@ static void tex_env_conf_shadow(int stage, int enable)
         tex_env_conf_default(TEX_STAGE_TEXTURE, enable);
         break;
     }
+    #endif
 }
 
 static void tex_env_conf_pose(int stage, int enable)
@@ -212,8 +216,12 @@ static void tex_env_conf(const struct tex_env *env, int enable)
     for (i = 0; i < env->count; i++)
     {
         const struct tex_stage *st = &env->stages[i];
+        #ifdef N64
+        #warning glActiveTexture and glClientActiveTexture not supported
+        #else
         glActiveTexture_(st->unit);
         glClientActiveTexture_(st->unit);
+        #endif
         env->conf(st->stage, enable);
     }
 
@@ -274,8 +282,12 @@ int tex_env_stage(int stage)
 
             if (st->stage == stage)
             {
+                #ifdef N64
+                #warning glActiveTexture and glClientActiveTexture not supported
+                #else
                 glActiveTexture_(st->unit);
                 glClientActiveTexture_(st->unit);
+                #endif
                 return 1;
             }
         }
@@ -595,6 +607,11 @@ void shad_init(void)
 
     if (config_get_d(CONFIG_SHADOW) == 2)
     {
+        #ifdef N64
+        #warning GL_CLAMP_TO_EDGE not supported
+        #undef GL_CLAMP_TO_EDGE
+        #define GL_CLAMP_TO_EDGE GL_CLAMP
+        #endif
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
@@ -611,6 +628,11 @@ void shad_init(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    #ifdef N64
+    #warning GL_CLAMP_TO_EDGE not supported
+    #undef GL_CLAMP_TO_EDGE
+    #define GL_CLAMP_TO_EDGE GL_CLAMP
+    #endif
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }

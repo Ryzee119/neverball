@@ -26,6 +26,9 @@
 
 int font_load(struct font *ft, const char *path, int sizes[3])
 {
+    #ifdef N64
+    #warning Fonts disabled
+    #else
     if (ft && path && *path)
     {
         memset(ft, 0, sizeof (*ft));
@@ -46,6 +49,7 @@ int font_load(struct font *ft, const char *path, int sizes[3])
             return 1;
         }
     }
+    #endif
     return 0;
 }
 

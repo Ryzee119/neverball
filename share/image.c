@@ -12,11 +12,21 @@
  * General Public License for more details.
  */
 
+#ifdef N64
+#include <libdragon.h>
+#include <math.h>
+#include <stdlib.h>
+#include <GL/gl.h>
+#include <GL/gl_integration.h>
+#else
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <png.h>
+#include "fs_png.h"
+#endif
+
 #include <string.h>
 #include <math.h>
-#include <png.h>
 #include <stdlib.h>
 
 #include "glext.h"
@@ -26,12 +36,14 @@
 #include "video.h"
 
 #include "fs.h"
-#include "fs_png.h"
 
 /*---------------------------------------------------------------------------*/
 
 void image_snap(const char *filename)
 {
+    #ifdef N64
+    return;
+    #else
     fs_file     filep  = NULL;
     png_structp writep = NULL;
     png_infop   infop  = NULL;
@@ -95,6 +107,7 @@ void image_snap(const char *filename)
 
     png_destroy_write_struct(&writep, &infop);
     fs_close(filep);
+    #endif
 }
 
 /*---------------------------------------------------------------------------*/
@@ -123,19 +136,21 @@ GLuint make_texture(const void *p, int w, int h, int b, int fl)
 
     GLint max = gli.max_texture_size;
 
+    assert(w * h <= max);
+
     void *q = NULL;
 
-    while (w / k > (int) max || h / k > (int) max)
-        k *= 2;
-
-    if (k > 1)
-        q = image_scale(p, w, h, b, &W, &H, k);
 
     /* Generate and configure a new OpenGL texture. */
 
     glGenTextures(1, &o);
     glBindTexture(GL_TEXTURE_2D, o);
 
+    #ifdef N64
+    #warning GL_CLAMP_TO_EDGE not supported
+    #undef GL_CLAMP_TO_EDGE
+    #define GL_CLAMP_TO_EDGE GL_CLAMP
+    #endif
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -156,9 +171,13 @@ GLuint make_texture(const void *p, int w, int h, int b, int fl)
 
     /* Copy the image to an OpenGL texture. */
 
+    #ifdef N64
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, W, H, 0, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1_EXT, q ? q : p);
+    #else
     glTexImage2D(GL_TEXTURE_2D, 0,
                  format[b], W, H, 0,
                  format[b], GL_UNSIGNED_BYTE, q ? q : p);
+    #endif
 
     if (q) free(q);
 
@@ -200,6 +219,10 @@ GLuint make_image_from_font(int *W, int *H,
                             const char *text, TTF_Font *font, int fl)
 {
     GLuint o = 0;
+    #ifdef N64
+    #warning Need to implement make_image_from_font
+    return 0;
+    #else
 
     /* Render the text. */
 
@@ -264,6 +287,7 @@ GLuint make_image_from_font(int *W, int *H,
         if (W) *W = 0;
         if (H) *H = 0;
     }
+    #endif
 
     return o;
 }
@@ -276,7 +300,13 @@ void size_image_from_font(int *W, int *H,
                           const char *text, TTF_Font *font)
 {
     int text_w, text_h, w2, h2;
-
+    #ifdef N64
+    if (w) *w = 0;
+    if (h) *h = 0;
+    if (W) *W = 0;
+    if (H) *H = 0;
+    return;
+    #else
     TTF_SizeUTF8(font, text, &text_w, &text_h);
 
     if (w) *w = text_w;
@@ -286,6 +316,7 @@ void size_image_from_font(int *W, int *H,
 
     if (W) *W = w2;
     if (H) *H = h2;
+    #endif
 }
 
 /*---------------------------------------------------------------------------*/
@@ -295,6 +326,10 @@ void size_image_from_font(int *W, int *H,
  */
 SDL_Surface *load_surface(const char *filename)
 {
+    #ifdef N64
+    //Not used on N64
+    return NULL;
+    #else
     void  *p;
     int    w;
     int    h;
@@ -314,6 +349,7 @@ SDL_Surface *load_surface(const char *filename)
         free(p);
     }
     return srf;
+    #endif
 }
 
 /*---------------------------------------------------------------------------*/

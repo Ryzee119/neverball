@@ -3,7 +3,11 @@
 
 /*---------------------------------------------------------------------------*/
 
+#ifdef N64
+void nb_audio_init(void); //Needed to rename due to conflict with libdragon
+#else
 void audio_init(void);
+#endif
 void audio_free(void);
 void audio_play(const char *, float);
 

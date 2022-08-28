@@ -409,6 +409,7 @@ fs_file fs_open_read(const char *path)
 
         if (!opened)
         {
+            fprintf(stderr, "%s Could not open %s\n", __FUNCTION__, path);
             free(fh);
             fh = NULL;
         }

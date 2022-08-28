@@ -260,7 +260,11 @@ void part_draw_coin(struct s_rend *rend)
             const GLfloat c[3] = { 0.0f, 0.0f, 1.0f };
 
             glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+            #ifdef N64
+            #warning glPointParameterfv unsupported
+            #else
             glPointParameterfv_(GL_POINT_DISTANCE_ATTENUATION, c);
+            #endif
             glPointSize(height / 6);
 
             glDrawArrays(GL_POINTS, 0, PART_MAX_COIN);

@@ -442,6 +442,9 @@ void game_draw(struct game_draw *gd, int pose, float t)
 
             /* Draw the reflection. */
 
+            #ifdef N64
+            #warning Reflections not supported
+            #else
             if (gd->draw.reflective && config_get_d(CONFIG_REFLECTION))
             {
                 glEnable(GL_STENCIL_TEST);
@@ -479,6 +482,7 @@ void game_draw(struct game_draw *gd, int pose, float t)
                 }
                 glDisable(GL_STENCIL_TEST);
             }
+            #endif
 
             /* Ready the lights for foreground rendering. */
 

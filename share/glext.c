@@ -122,8 +122,35 @@ static void log_opengl(void)
 
 int glext_fail(const char *title, const char *message)
 {
+    #ifdef N64
+    assertf(0, "%s %s", title, message);
+    #else
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, NULL);
+    #endif
     return 0;
+}
+
+#include <libdragon.h>
+static void glActiveTexture(GLenum texture)
+{
+    assertf(0, "%s not supported\n", __FUNCTION__);
+}
+
+void glClientActiveTexture(	GLenum texture)
+{
+    assertf(0, "%s not supported\n", __FUNCTION__);
+}
+
+
+void glPointParameterf(	GLenum pname, GLfloat param)
+{
+    assertf(0, "%s not supported\n", __FUNCTION__);
+}
+
+
+void glPointParameterfv(GLenum pname, const GLfloat * params)
+{
+    assertf(0, "%s not supported\n", __FUNCTION__);
 }
 
 int glext_init(void)
@@ -132,14 +159,60 @@ int glext_init(void)
 
     /* Common init. */
 
+    #ifdef N64
+    #warning glGetIntegerv does not support GL_MAX_TEXTURE_SIZE or GL_MAX_TEXTURE_UNITS
+    gli.max_texture_size = 2048;
+    gli.max_texture_units = 1;
+    #else
     glGetIntegerv(GL_MAX_TEXTURE_SIZE,  &gli.max_texture_size);
     glGetIntegerv(GL_MAX_TEXTURE_UNITS, &gli.max_texture_units);
+    #endif
 
     if (glext_check("GL_EXT_texture_filter_anisotropic"))
         gli.texture_filter_anisotropic = 1;
 
     /* Desktop init. */
 
+#ifdef N64
+    glClientActiveTexture_ = glActiveTexture;
+    glActiveTexture_ = glClientActiveTexture;
+    glGenBuffers_ = glGenBuffersARB;
+    glBindBuffer_ = glBindBufferARB;
+    glBufferData_ = glBufferDataARB;
+    glBufferSubData_ = glBufferSubDataARB;
+    glDeleteBuffers_ = glDeleteBuffersARB;
+    glIsBuffer_ = glIsBufferARB;
+    glPointParameterf_ = glPointParameterf;
+    glPointParameterfv_ = glPointParameterfv;
+    glGetShaderiv_ = NULL;
+    glGetShaderInfoLog_ = NULL;
+    glGetProgramiv_ = NULL;
+    glGetProgramInfoLog_ = NULL;
+    glCreateShader_ = NULL;
+    glCreateProgram_ = NULL;
+    glShaderSource_ = NULL;
+    glCompileShader_ = NULL;
+    glDeleteShader_ = NULL;
+    glDeleteProgram_ = NULL;
+    glAttachShader_ = NULL;
+    glLinkProgram_ = NULL;
+    glUseProgram_ = NULL;
+    glGetUniformLocation_ = NULL;
+    glUniform1f_ = NULL;
+    glUniform2f_ = NULL;
+    glUniform3f_ = NULL;
+    glUniform4f_ = NULL;
+    glBindFramebuffer_ = NULL;
+    glDeleteFramebuffers_ = NULL;
+    glGenFramebuffers_ = NULL;
+    glFramebufferTexture2D_ = NULL;
+    glCheckFramebufferStatus_ = NULL;
+    gli.shader_objects = 0;
+    gli.framebuffer_object = 0;
+    gli.texture_filter_anisotropic = 0;
+    log_opengl();
+    return 1;
+#endif
 #if !ENABLE_OPENGLES && !defined(__EMSCRIPTEN__)
     void *ptr = 0;
 
@@ -234,7 +307,11 @@ void glClipPlane4f_(GLenum p, GLfloat a, GLfloat b, GLfloat c, GLfloat d)
     v[2] = c;
     v[3] = d;
 
+    #ifdef N64
+    #warning glClipPlane not supported
+    #else
     glClipPlane(p, v);
+    #endif
 
 #endif
 }

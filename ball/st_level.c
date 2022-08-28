@@ -250,8 +250,12 @@ int goto_exit(void)
     {
         /* Quit the game. */
 
+        #ifdef N64
+        #warning quit properly
+        #else
         SDL_Event e = { SDL_QUIT };
         SDL_PushEvent(&e);
+        #endif
     }
 
     return 1;

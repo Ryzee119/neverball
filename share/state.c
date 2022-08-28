@@ -267,6 +267,9 @@ int st_buttn(int b, int d)
 
 int st_touch(const SDL_TouchFingerEvent *event)
 {
+    #ifdef N64
+    return 0;
+    #else
     int d = 1;
 
     /* If the state can handle it, do it. */
@@ -287,6 +290,7 @@ int st_touch(const SDL_TouchFingerEvent *event)
         d = st_click(SDL_BUTTON_LEFT, 0);
 
     return d;
+    #endif
 }
 
 /*---------------------------------------------------------------------------*/

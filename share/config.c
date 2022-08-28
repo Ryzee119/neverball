@@ -138,24 +138,24 @@ static struct
 } option_d[] = {
     { &CONFIG_FULLSCREEN,   "fullscreen",   0 },
     { &CONFIG_DISPLAY,      "display",      0 },
-    { &CONFIG_WIDTH,        "width",        800 },
-    { &CONFIG_HEIGHT,       "height",       600 },
+    { &CONFIG_WIDTH,        "width",        320 },
+    { &CONFIG_HEIGHT,       "height",       240 },
     { &CONFIG_STEREO,       "stereo",       0 },
     { &CONFIG_CAMERA,       "camera",       0 },
     { &CONFIG_TEXTURES,     "textures",     1 },
-    { &CONFIG_REFLECTION,   "reflection",   1 },
+    { &CONFIG_REFLECTION,   "reflection",   0 },
     { &CONFIG_MULTISAMPLE,  "multisample",  0 },
     { &CONFIG_MIPMAP,       "mipmap",       1 },
-    { &CONFIG_ANISO,        "aniso",        8 },
-    { &CONFIG_BACKGROUND,   "background",   1 },
-    { &CONFIG_SHADOW,       "shadow",       1 },
+    { &CONFIG_ANISO,        "aniso",        0 },
+    { &CONFIG_BACKGROUND,   "background",   0 },
+    { &CONFIG_SHADOW,       "shadow",       0 },
     { &CONFIG_AUDIO_BUFF,   "audio_buff",   AUDIO_BUFF_HI },
     { &CONFIG_MOUSE_SENSE,  "mouse_sense",  300 },
     { &CONFIG_MOUSE_RESPONSE, "mouse_response", 50 },
     { &CONFIG_MOUSE_INVERT, "mouse_invert", 0 },
     { &CONFIG_VSYNC,        "vsync",        1 },
     { &CONFIG_HMD,          "hmd",          0 },
-    { &CONFIG_HIGHDPI,      "highdpi",      1 },
+    { &CONFIG_HIGHDPI,      "highdpi",      0 },
 
     { &CONFIG_MOUSE_CAMERA_1,      "mouse_camera_1",      0 },
     { &CONFIG_MOUSE_CAMERA_2,      "mouse_camera_2",      0 },
@@ -251,6 +251,7 @@ static int dirty = 0;
 
 /*---------------------------------------------------------------------------*/
 
+#ifndef N64
 static void config_key(const char *s, int i)
 {
     SDL_Keycode c = SDL_GetKeyFromName(s);
@@ -293,6 +294,7 @@ static const char *config_mouse_name(int b)
     }
 }
 
+#endif
 /*---------------------------------------------------------------------------*/
 
 void config_init(void)
@@ -334,6 +336,7 @@ void config_quit(void)
  * the strings; instead, the option string is modified in-place as
  * needed.  Return 1 on success, 0 on error.
  */
+#ifndef N64
 static int scan_key_and_value(char **dst_key, char **dst_val, char *line)
 {
     if (line)
@@ -362,9 +365,13 @@ static int scan_key_and_value(char **dst_key, char **dst_val, char *line)
 
     return 0;
 }
+#endif
 
 void config_load(void)
 {
+    #ifdef N64
+    #warning config_load todo?
+    #else
     fs_file fh;
 
     SDL_assert(SDL_WasInit(SDL_INIT_VIDEO));
@@ -438,10 +445,14 @@ void config_load(void)
 
         dirty = 0;
     }
+    #endif
 }
 
 void config_save(void)
 {
+    #ifdef N64
+    #warning config_save todo?
+    #else
     fs_file fh;
 
     SDL_assert(SDL_WasInit(SDL_INIT_VIDEO));
@@ -506,6 +517,7 @@ void config_save(void)
     }
 
     dirty = 0;
+    #endif
 }
 
 /*---------------------------------------------------------------------------*/

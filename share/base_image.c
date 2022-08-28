@@ -12,8 +12,15 @@
  * General Public License for more details.
  */
 
+#ifdef N64
+#include <libdragon.h>
+#include "common.h"
+#else
 #include <png.h>
 #include <jpeglib.h>
+#include "fs_png.h"
+#include "fs_jpg.h"
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -23,8 +30,6 @@
 #include "base_image.h"
 
 #include "fs.h"
-#include "fs_png.h"
-#include "fs_jpg.h"
 
 /*---------------------------------------------------------------------------*/
 
@@ -51,6 +56,7 @@ void image_near2(int *W, int *H, int w, int h)
 
 /*---------------------------------------------------------------------------*/
 
+#ifndef N64
 static void *image_load_png(const char *filename, int *width,
                                                   int *height,
                                                   int *bytes)
@@ -219,11 +225,71 @@ static void *image_load_jpg(const char *filename, int *width,
 
     return p;
 }
+#endif
 
 void *image_load(const char *filename, int *width,
                                        int *height,
                                        int *bytes)
 {
+    #ifdef N64
+    //For N64, we prefix all paths with rom:/neverball/data/
+    //also all jpg and pngs have been converted to .sprite formats
+    //so change the extensions too
+    char temp[256];
+    char *ext;
+    sprite_t sprite;
+    uint8_t *data;
+    size_t sz, rd;
+    FILE *fp;
+    SAFECPY(temp, "rom:/neverball/data/");
+    SAFECAT(temp, filename);
+    ext = strstr(temp, ".png");
+    if (ext)
+    {
+        *ext = '\0';
+        SAFECAT(temp, ".sprite");
+    }
+    ext = strstr(temp, ".jpg");
+    if (ext)
+    {
+        *ext = '\0';
+        SAFECAT(temp, ".sprite");
+    }
+
+    fp = fopen(temp, "r");
+    if (fp != NULL)
+    {
+        //Sprite reading is broken up into stages as neverball expects
+        //a pointer to the raw data which is later freed by free()
+        //so we cant return a malloced sprite pointer directly.
+        //Get file size
+        fseek(fp, 0L, SEEK_END);
+        sz = ftell(fp);
+        rewind(fp);
+
+        //Get sprite info data
+        fread(&sprite, 1, sizeof(sprite_t) - sizeof(sprite.data), fp);
+        *width = sprite.width;
+        *height = sprite.height;
+        *bytes = sprite.bitdepth;
+
+        //Read in the sprite data
+        data = malloc(sz);
+        assert(data);
+        rd = fread(data, 1, sprite.width * sprite.height * sprite.bitdepth, fp);
+        assert(rd == sprite.width * sprite.height * sprite.bitdepth);
+        fclose(fp);
+
+        for (int i = 0; i < sprite.width * sprite.height; i++)
+        {
+            uint16_t *d = (uint16_t *)data;
+            d[i] |= 0x0001;
+        }
+
+        fprintf(stderr, "load image %s OK!, %dx%dx%d\n", temp, *width, *height, sprite.bitdepth);
+        return data;
+    }
+    #else
     if (filename && strlen(filename) > 4)
     {
         const char *ext = filename + strlen(filename) - 4;
@@ -233,6 +299,7 @@ void *image_load(const char *filename, int *width,
         else if (strcmp(ext, ".jpg") == 0 || strcmp(ext, ".JPG") == 0)
             return image_load_jpg(filename, width, height, bytes);
     }
+    #endif
     return NULL;
 }
 

@@ -946,6 +946,9 @@ void r_apply_mtrl(struct s_rend *rend, int mi)
 
     if ((mp_flags & M_DECAL) ^ (mq_flags & M_DECAL))
     {
+        #ifdef N64
+        #warning glPolygonOffset not supported
+        #else
         if (mp_flags & M_DECAL)
         {
             glEnable(GL_POLYGON_OFFSET_FILL);
@@ -953,6 +956,7 @@ void r_apply_mtrl(struct s_rend *rend, int mi)
         }
         else
             glDisable(GL_POLYGON_OFFSET_FILL);
+        #endif
     }
 
     /* Alpha test. */
@@ -990,9 +994,13 @@ void r_apply_mtrl(struct s_rend *rend, int mi)
 
             glEnable (GL_POINT_SPRITE);
             glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+            #ifdef N64
+            #warning glPointParameterfv and glPointParameterf unsupported
+            #else
             glPointParameterfv_(GL_POINT_DISTANCE_ATTENUATION, c);
             glPointParameterf_ (GL_POINT_SIZE_MIN, 1);
             glPointParameterf_ (GL_POINT_SIZE_MAX, s);
+            #endif
         }
         else
         {

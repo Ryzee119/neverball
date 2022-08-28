@@ -110,6 +110,10 @@ void config_paths(const char *arg_data_path)
 
     /* Set up directory for writing, create if needed. */
 
+    #ifdef N64
+    free((void *) user);
+    user = "sram:/";
+    #endif
     if (!fs_set_write_dir(user))
     {
         int success = 0;
@@ -134,7 +138,9 @@ void config_paths(const char *arg_data_path)
 
     fs_add_path_with_archives(user);
 
+    #ifndef N64
     free((void *) user);
+    #endif
 }
 
 /*---------------------------------------------------------------------------*/

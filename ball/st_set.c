@@ -187,6 +187,9 @@ static int set_action(int tok, int val)
             set_goto(val);
             return goto_state(&st_start);
         }
+        #ifdef N64
+        #warning Downloadable sets disabled
+        #else
         else if (set_is_downloadable(val))
         {
             struct fetch_callback callback = { 0 };
@@ -215,6 +218,7 @@ static int set_action(int tok, int val)
         {
             return 1;
         }
+        #endif
         break;
     }
 

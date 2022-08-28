@@ -103,13 +103,22 @@ void text_input_start(void (*cb)(int))
     text_input[0] = 0;
     CALLBACK(0);
 
+    #ifdef N64
+    #warning Text input bypassed
+    strcpy(text_input, "Libdragon");
+    #else
     SDL_StartTextInput();
+    #endif
 }
 
 void text_input_stop(void)
 {
     on_text_input = NULL;
+    #ifdef N64
+    #warning Text input bypassed
+    #else
     SDL_StopTextInput();
+    #endif
 }
 
 int text_input_str(const char *input, int typing)

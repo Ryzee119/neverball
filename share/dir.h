@@ -31,6 +31,8 @@ int dir_exists(const char *);
 #ifdef _WIN32
 #include <direct.h>
 #define dir_make(path) _mkdir(path)
+#elif N64
+#define dir_make(path) 0
 #else
 #include <sys/stat.h>
 #define dir_make(path) mkdir(path, 0777)

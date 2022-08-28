@@ -14,6 +14,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "mtrl.h"
 #include "array.h"
@@ -94,6 +95,7 @@ static GLuint find_texture(const char *name)
         if ((o = make_image_from_file(path, IF_MIPMAP)))
             return o;
     }
+    fprintf(stderr, "%s Could not open %s\n", __FUNCTION__, name);
     return 0;
 }
 
@@ -113,6 +115,11 @@ static void load_mtrl_objects(struct mtrl *mp)
     {
         /* Set the texture to clamp or repeat based on material type. */
 
+        #ifdef N64
+        #warning GL_CLAMP_TO_EDGE not supported
+        #undef GL_CLAMP_TO_EDGE
+        #define GL_CLAMP_TO_EDGE GL_CLAMP
+        #endif
         if (mp->base.fl & M_CLAMP_S)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         else

@@ -539,6 +539,9 @@ static int play_loop_buttn(int b, int d)
 
 static int play_loop_touch(const SDL_TouchFingerEvent *event)
 {
+    #ifdef N64
+    return 0;
+    #else
     if (event->type == SDL_FINGERMOTION)
     {
         int dx = (int) ((float) video.device_w * event->dx);
@@ -546,6 +549,7 @@ static int play_loop_touch(const SDL_TouchFingerEvent *event)
 
         game_set_pos(dx, dy);
     }
+    #endif
 
     // TODO: rotate camera, change camera, etc.
 
