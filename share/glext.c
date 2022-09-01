@@ -130,6 +130,7 @@ int glext_fail(const char *title, const char *message)
     return 0;
 }
 
+#ifdef N64
 #include <libdragon.h>
 static void glActiveTexture(GLenum texture)
 {
@@ -152,6 +153,7 @@ void glPointParameterfv(GLenum pname, const GLfloat * params)
 {
     assertf(0, "%s not supported\n", __FUNCTION__);
 }
+#endif
 
 int glext_init(void)
 {

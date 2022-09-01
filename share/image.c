@@ -140,6 +140,16 @@ GLuint make_texture(const void *p, int w, int h, int b, int fl)
 
     void *q = NULL;
 
+    #ifdef N64
+    assert(w * h <= max);
+    #else
+    while (w / k > (int) max || h / k > (int) max)
+        k *= 2;
+
+    if (k > 1)
+        q = image_scale(p, w, h, b, &W, &H, k);
+    #endif
+
 
     /* Generate and configure a new OpenGL texture. */
 
